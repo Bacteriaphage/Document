@@ -1,0 +1,34 @@
+1. suffix tree : 
+    easy to deal substring related problem
+
+2. segment tree : 
+    counting, sum or other operation according to a range;
+
+3. interval tree : 
+    not segment tree, implemented by R-B tree, can judge whether a interval[i, j] in the existed intervals, log(n) time;(build in rule of R-B with lowest element in a interval, the node also record the rightest border of all its successors. This is because find progress is based on the rightest value in each node)
+
+4. binary index tree:
+    A beautiful data structure which is based on array, can deal with high demantional range sum or other operations in O(log n) time. Because of mathematics, the array should have more space than target range by 1.
+class BinaryIndexTree{
+    build(vector<int> nums){
+            vector<int> binary(nums.size()+1, 0);
+            for(int i = 0; i<nums.size(); i++){
+                int j = i + 1;
+                while(j < binary.size()){
+                    binary[j] += nums[i];
+                    j = j+(j&(-j));   // this can update all space related to current element;
+                }
+            }
+    }
+    query(int i, int j){
+        j++; //index in binary array is always larger than orignal array;
+        while(j > 0){
+                sum += binary[j];
+                j = j - (j & (-j));
+        }
+        while(i > 0){
+                sum -= binary[i];
+                i = i - (i & (-i));
+        }
+    }
+}
