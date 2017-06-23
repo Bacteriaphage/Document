@@ -1,0 +1,83 @@
+//move_forward.cpp
+#include <iostream>
+
+using namespace std;
+class Myclass;
+void overloaded( Myclass const &arg ) { std::cout << "by lvalue\n"; }
+
+void overloaded( Myclass && arg ) { std::cout << "by rvalue\n"; }
+
+class Myclass{
+public:
+    Myclass(){
+        cout << "construct!" << endl;
+    }
+    Myclass(const Myclass& obj){
+        cout << "copied!" << endl;
+    }
+};
+void foo(Myclass & x){
+    cout << "lvalue x" << endl;
+}
+void foo(Myclass&& x){
+    cout << "rvalue x" << endl;
+}
+template< typename t >
+/* "t &&" with "t" being template param is special, and  adjusts "t" to be
+   (for example) "int &" or non-ref "int" so std::forward knows what to do. */
+void forwarding( t && arg ) {
+    std::cout << "via std::forward: ";
+    overloaded( std::forward< t >( arg ) );
+    std::cout << "via std::move: ";
+    overloaded( std::move( arg ) ); // conceptually this would invalidate arg
+    std::cout << "by simple passing: ";
+    overloaded( arg );
+}
+template<typename T>
+void deduce(T&& x){
+    foo(static_cast<T&&>(x));
+}
+int main() {
+    std::cout << "initial caller passes rvalue:\n";
+    //forwarding( 5 );
+    std::cout << "initial caller passes lvalue:\n";
+    //int x = 5;
+    //forwarding( x );
+    Myclass obj;
+    forwarding((Myclass()));
+    //deduce((Myclass()));
+    //deduction order:
+    //(Myclass())(rvalue) -> function template:
+    //template<typename int>
+    //void deduce(Myclass&& x)
+    //x now temperary of (Myclass()) and (Myclass()) does not "exist" in main.
+    //because T&& int&& -> int&&, so the rvalue (Myclass()) pass to next function as rvalue reference not left.
+
+    //if we call deduce(obj)
+    //deduction order:
+    //(obj)(lvalue) - >function template:
+    //template<typename T&>
+    //void deduce(Myclass&& x&) -> void deduce(Myclass& x)   lvalue reference
+    //what we do to this x will impact the obj outside.
+    //because T&& Myclass& -> Myclass&, foo will get a lvalue so it calls foo(Myclass&)
+
+    //In summary:
+    //There are acutually three type deduction in this scenario:
+    //1. template deduction:
+    //  T rvalue -> T
+    //  T lvalue -> T&
+    //2. universal reference deduction:
+    //  T&& & -> T&
+    //  T&& && -> T&& (we use these two)
+    //  T&  & -> T&
+    //  T&  && -> T&
+    //3. after pass correct catagory of type into wrapper function(deduce), we need static_cast<T&&>(obj) to pass same type catagory 
+    //to next function call(foo), the forward function is totally same as static_cast<T&&> which means:
+    // foo(forward<T>(obj)) === foo(static_cast<T&&>(obj));
+    
+    //Additionally, rvalue reference can be changed, rvalue is not const, it is just a temperary value and rvalue reference take that value.
+    //It will disappear when no one use it. 
+    int &&x = 5;
+    x = 6;
+    cout << x << endl;
+}
