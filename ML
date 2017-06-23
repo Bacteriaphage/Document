@@ -1,0 +1,22 @@
+session2：
+
+minimum of J(theta) should decrease after every iteration. If not, use small alpha(learning rate)
+
+normal equation(linear regression):
+
+theta = (1 / (X'X))X'y
+
+Gradian Descent:
+1.need to choose alpha
+2.need interations
+3.works well even when n is large.
+
+Noraml Equation:
+no need alpha
+don`t need iteration
+need to compute matrix inverse O(n*n*n) inv(X'X)
+slow if n is very large (n>10k)
+
+non-invertible X'X:
+1.two feature are linearly dependent
+2.too many features(m <= n)(use regularization)
