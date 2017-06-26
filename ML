@@ -20,3 +20,10 @@ slow if n is very large (n>10k)
 non-invertible X'X:
 1.two feature are linearly dependent
 2.too many features(m <= n)(use regularization)
+
+session3:
+all about logistic regression using sigmoid function. Using linear regression cannot classify the training data set. we use sigmoid funtion which is 1 / (1 + exp(-z)) to divide data set to two part. The result of this funtion is the possibility of y = 1 for different x.
+We talked about it cost function, it is not simple as a variance for the linear regresion. It can be calculated depend on what y is (1 or 0). After we have cost function, we can easily do gradient descent. The gradient descent of logistic regression is very much like it of linear regression, except h(x) is not X*theta but sigmoid(X*theta).
+Besides gradient descent, we can also use some advanced algorithm to do the regression, in octave there is a function named fminunc() to calculate that.
+
+Because some models we use have a lot of features, it will make the final result overfit for the future samples. We need penalize those parameters which make the curve complicated. So we add [lambda / (2 * m)] * theta * theta to cost function but dont count theta(1) into it. Reasonably, the gradient descent should also change for each theta except theta(1).
