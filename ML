@@ -27,3 +27,6 @@ We talked about it cost function, it is not simple as a variance for the linear 
 Besides gradient descent, we can also use some advanced algorithm to do the regression, in octave there is a function named fminunc() to calculate that.
 
 Because some models we use have a lot of features, it will make the final result overfit for the future samples. We need penalize those parameters which make the curve complicated. So we add [lambda / (2 * m)] * theta * theta to cost function but dont count theta(1) into it. Reasonably, the gradient descent should also change for each theta except theta(1).
+
+session6:
+using cross-validation set is because without cv set, the hypothesis is optimised by parameter d for a specific test set. This will make the curve overfit for all future data. using cv set to get d then the test set can objectively judge the hypothesis.
