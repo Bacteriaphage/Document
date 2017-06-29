@@ -30,3 +30,8 @@ Because some models we use have a lot of features, it will make the final result
 
 session6:
 using cross-validation set is because without cv set, the hypothesis is optimised by parameter d for a specific test set. This will make the curve overfit for all future data. using cv set to get d then the test set can objectively judge the hypothesis.
+
+session7:
+SVM - Large Margin classifier
+SVM is based on logistic regression which it makes the h(theta) in the cost function a region linear function, and the threshold is not 0.5 but z > 1 when y = 1 and z < -1 when y = 0.
+In SVM the C parameter(1 / lambda) is very large(this is why large margin appear), so the first part of cost function must be 0 that means z > 1 when y = 1 and z < -1 when y = 0. Then in order to make cost as small as possible, the regularzation part sum(theta^2) ~= ||theta|| should be small. This happened only when the projection(p) of x(i) on vector[theta] is large enough, so that z === p||theta|| should be larger than 1 or smaller than -1 when ||theta|| is small 
