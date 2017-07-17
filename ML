@@ -1,3 +1,5 @@
+#basic note
+
 session2：
 
 minimum of J(theta) should decrease after every iteration. If not, use small alpha(learning rate)
@@ -43,3 +45,5 @@ while(centroid move)
 1.assign cluster
 2.average centroid
 end
+
+#cocktail party problem(Deep Neural Network)
