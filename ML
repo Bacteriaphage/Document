@@ -11,7 +11,7 @@ Gradian Descent:
 2.need interations
 3.works well even when n is large.
 
-Noraml Equation:
+Normal Equation:
 no need alpha
 don`t need iteration
 need to compute matrix inverse O(n*n*n) inv(X'X)
