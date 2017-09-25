@@ -23,6 +23,8 @@ non-invertible X'X:
 1.two feature are linearly dependent
 2.too many features(m <= n)(use regularization)
 
+regularization: add additional column in cost function, make some parameter has lowest impact to total cost function, because the cost value should be as small as possible. 
+
 session3:
 all about logistic regression using sigmoid function. Using linear regression cannot classify the training data set. we use sigmoid funtion which is 1 / (1 + exp(-z)) to divide data set to two part. The result of this funtion is the possibility of y = 1 for different x.
 We talked about it cost function, it is not simple as a variance for the linear regresion. It can be calculated depend on what y is (1 or 0). After we have cost function, we can easily do gradient descent. The gradient descent of logistic regression is very much like it of linear regression, except h(x) is not X*theta but sigmoid(X*theta).
@@ -32,6 +34,8 @@ Because some models we use have a lot of features, it will make the final result
 
 session6:
 using cross-validation set is because without cv set, the hypothesis is optimised by parameter d for a specific test set. This will make the curve overfit for all future data. using cv set to get d then the test set can objectively judge the hypothesis.
+
+parameter d figures out what kind of polynominal model we use, linear function or quadratic dunction or etc.
 
 session7:
 SVM - Large Margin classifier
