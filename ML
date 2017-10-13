@@ -51,3 +51,16 @@ while(centroid move)
 end
 
 #cocktail party problem(Deep Neural Network)
+
+#DL:
+
+##C1_W3:
+###activation function:
+1. sigmoid(not suggest)
+2. tanh funtion (if hidden layer has average 0, it is prefered)
+3. ReLu a = max(0, z)(fast learning, good derivative)
+4. leaky ReLu a = max(0.01, Z)
+
+###gradient descent:
+1. sigmoid` = sig(1-sig)
+2. tanh` = 1-tanh^2
