@@ -1,0 +1,10 @@
+NVIDIA tech
+
+1. basic stuff, host, device.
+   How to Malloc, memcpy
+   
+2. different kind of memory, global, local, shared, const.
+   atomic stuff, race condition
+   
+3. Architecture, SPA, TPC, SM, SP
+   scoreboard
