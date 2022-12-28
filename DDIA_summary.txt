@@ -1,0 +1,13 @@
+chapter 1.
+  Three important factors for a system: reliability, scalability, maintainability
+  Reliablity: 
+    fault vs failure: single component/user/etc. can make fault, if that cause whole system down, that's a failure.
+    We can deliberately introduce fault to system to make it resilient/fault-tolerant.
+    idealy, we better reduce faults in each component, but in reality, we have to deal with them.
+    Hardware error: add redundancy or have software to handle faults
+    Software error: hard to find, can cause cascading failures, better to carefully think when design, thorough testing, allowing crash and restart
+                    monitoring, analyzing system behavior in production. Look for guarantee like sum check, sequence check to make self check.
+    Human error: human error is the leading cause of outage comparing to software and hardware. We need to design system in a way that easy for 
+                 human to do the right thing instead of the wrong thing, which refer to a well API design, a user-friendly UI etc.
+                 Sandbox is important for detacting human error. Thoroughly test at all levels, Quick and easy recovery(rollback)
+                 Monitoring, good management practice.
