@@ -11,3 +11,25 @@ chapter 1.
                  human to do the right thing instead of the wrong thing, which refer to a well API design, a user-friendly UI etc.
                  Sandbox is important for detacting human error. Thoroughly test at all levels, Quick and easy recovery(rollback)
                  Monitoring, good management practice.
+  Scalability:
+    Before working on scalability, the first thing is to understand what is current load.
+    learning case: Twitter
+      In 2012, all twitter users publish 4.6k/s tweets on average, 12k/s tweets at peak. Each user has 75 followers on average, millions followers for celebrities.
+      Users make 300k/s read requests.
+      When a User open twitter, he/she will read tweets in home timeline, both from normal user and celebrities. To execute a query to join follows/tweets/users will
+      space lots of time. A alternative way is to push new tweets to user's own cache, but for celebrities who has millions of followers, this will introduce
+      more problems.
+      So twitter use hybrid mode which using normal join for celebrities, using cache for normal users.
+    Describe performance:
+      Think about two things: 1. when load parameters goes up, what happened if resource doesn't change? 2. how much new resource we need to fulfill new load parameters
+      A batch processing system more focuses on throughput, online system more focuses on response time. We can decouple those two in some use case likes
+      Exchange Trading System. Matching engine itself is a batch process system, and the module to get market data and send information back to clients is 
+      a online system.
+      Percentile/median is better than mean when describe performance. It tells us how many user request are slower than a number(median).
+      The response time are different between what client see and what the system see, it is because a slow culprit will make all later client requests wait. System
+      only calculate response time as normal, but client actually feels the slowness. So we have two ways to measure performace a little bit accurate:
+        1. monitor performance on client side, 2. Sending request independently, don't wait previous request to be finished.
+      To calculate percentiles in a sliding window, add up data in a time window and get the result, or use forward decay, t-digest, HdrHistogram.
+    Cope increasing load:
+      Use a more powerful machine or employ more small elastic machine? Is the service stateless or stateful? Which part of the system is the bottleneck? How about
+      maintainance effort we need for new resource?
