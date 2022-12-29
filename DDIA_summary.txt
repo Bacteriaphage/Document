@@ -33,3 +33,16 @@ chapter 1.
     Cope increasing load:
       Use a more powerful machine or employ more small elastic machine? Is the service stateless or stateful? Which part of the system is the bottleneck? How about
       maintainance effort we need for new resource?
+
+chapter 2.
+  Data model (relational or document) and query language
+  Relational DB vs Document DB:
+    If application has lots of one to many data, then Document DB (NoSQL) is a good choice, no join is needed and data are easy to be retrieved.
+    If we don't a have a fixed schema, we better to use NoSQL database, which is the schema-on-read pattern. It's like RTTI in C++, we cannot assume schema in databse
+    until we are reading it. In contrust, relational databse is schema-on-write, we have to follow certain rules when writing.
+    When we need to change schema often, NoSQL is preferred in terms of the slowness when altering table in some relational DB. They probably require some downtime.
+    If we access set of data in locality pattern, we can use NoSQL, because to join different tables, access indices will require lots of disk IO. NoSQL can
+    provide good locality attribute. However, if the amount of data we query is relatively small comparing to cache or we will modify the size of encoded data, it will
+    be expensive to achieve them in NoSQL.
+  Nowaday, relational and document DB are more and more complementing each other, relational DB has no schema JSON and NoSQL DB resolve relational reference. This 
+  hybrid of two models is good route for databases in the future. 
