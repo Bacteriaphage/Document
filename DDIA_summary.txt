@@ -46,3 +46,11 @@ chapter 2.
     be expensive to achieve them in NoSQL.
   Nowaday, relational and document DB are more and more complementing each other, relational DB has no schema JSON and NoSQL DB resolve relational reference. This 
   hybrid of two models is good route for databases in the future. 
+  Query Language:
+    declarative query language (SQL, relational algebra, CSS, MapReduce lang, Cypher node4j) vs imperative language
+    MapReduce is used by distributed data storage, but not the essential tool. SQL does not constrain to only run in a single node.
+    MongoDB use MapReduce, but also have tools like aggregation pipeline to deal with distributed use cases.
+    Graph-like data module use vertices and edge to store data and their relation. Any two vertices can connect with each other and user can traverse forward and 
+    backward. The relationship of edges can be different, so a graph can represent different information.
+    Semantic web and RDF data model: RDF is a machine readible web which similar to the information on the internet which human can understand. There are lots of
+    work to be done like standard proposal, complex, etc. (page 57)
