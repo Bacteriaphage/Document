@@ -54,3 +54,29 @@ chapter 2.
     backward. The relationship of edges can be different, so a graph can represent different information.
     Semantic web and RDF data model: RDF is a machine readible web which similar to the information on the internet which human can understand. There are lots of
     work to be done like standard proposal, complex, etc. (page 57)
+chapter 3.
+  Hash index: build hash index upon different field can boost reading speed, database engine will figure out which index is needed. However, we cannot store all
+    index in memory, we group part of indices into segments and write them into disk. In the meantime, data in segment would have duplication, we need to compact
+    them.
+    The disadvantage of hash index are 1. when index is in disk, the performance is not very good. 2. when query range of data, it will need to scan the whole hash 
+    table
+  SSTable and LSM-Trees:
+    1. the k-v pairs need to be sorted by key in a segment and one key only appear once in a segment file after merging
+    2. We only keep a sparse index table (sorted) in memory, each index point to the offset of key within a sorted segment file(SSTable) which is a small block. 
+       If the queried key is in between of two sparse indices, we only need to load the small compressed data block in SSTable
+    Steps of building SSTable:
+      1. write new data into an in-memory sorted balanced tree which we call memtable.
+      2. When the size of memtable exceed threshold, we write it into a SSTable and store it on the disk.
+      3. To find a record, we check memtable first, then the SSTable in starting from the latest.
+      4. Merge can compact SSTable in the background to save space.
+      5. To avoid losing memtable when crash, store log for memtable write without order into disk.
+    Performance improvement:
+      Bloom filters when read
+      Size-tiered compaction is for write intensive db, several small SSTable will be compacted into a larger one, this need 2x size of compacted data disk space.
+      Leveled compaction will compact L0 SSTable to higher level continuously. There are two parameters 1. max SSTable size, 2. max size of LevelX.
+      https://www.youtube.com/watch?v=TyTXOjFMi7k&t=617s&ab_channel=DataStaxDevelopers
+      Max size of LevelX is max SSTable size times X power of 10. L0 is a temporary level to store data, compactor will merge data from all SSTables in L0 and merge
+      new data with L1 SSTable, write them into a file not exceeding Max SSTable size and store them into L1. If the size of L1 exceed max size of Lv1, promote and
+      merge SSTables in Lv1 with Lv2 SSTables until remaining table in Lv1 fit in max size of L1 and so on.
+      https://www.youtube.com/watch?v=6yJEwqseMY4&ab_channel=DataStaxDevelopers
+      This is good for reading, when writing happenes, it is very IO intensive
