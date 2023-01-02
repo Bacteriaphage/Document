@@ -80,3 +80,60 @@ chapter 3.
       merge SSTables in Lv1 with Lv2 SSTables until remaining table in Lv1 fit in max size of L1 and so on.
       https://www.youtube.com/watch?v=6yJEwqseMY4&ab_channel=DataStaxDevelopers
       This is good for reading, when writing happenes, it is very IO intensive
+    Log-structured Merge-Tree:
+      Instead of calling it as a tree, it is more like a filesystem containning SSTable, MemTable, bloom filter and in memory index table.
+  B-tree:
+    When B tree insert new record and split a node, DB need to seek and write two pages for split and update parent page, which is a vulnerable operation. Because
+    when crash happens, index will be corrupted. We use WAL(write-ahead-log) to protect, it's an append only log on disk, updated before the pages of tree get updated.
+    we use latch(lightweight locks) to protect concurrency scenario.
+    Optimization:
+      Instead of overwriting pages and maintaining WAL for crash recovery, we use copy-on-write which doesn't overwrite original pages but create and copy to a new one
+      , it's also good for concurrency.
+      We can use abbreviating key instead of real one to add more key in to one node which gives us larger branching factor thus fewer levels, it's good for access key
+      Leaf node will add reference to it's sibling left and right allowing scanning keys in order without jumping back to paranet pages.
+  Comparing B-Tree and LSM-Tree:
+    LSM-Tree is faster for write and B-tree is faster for read, since LSM-tree need to check several different data structure and SSTables.
+    Advantage of LSM-tree:
+      B-tree must write twice once for WAL one for actual pages when inserting.
+      Log-structured indexes also rewrite data multiple times due to compaction and merging which we called write amplification.
+      However LSM-tree can typically sustain higher write throughput because of low amplification, and sequentially write compact SSTable is faster then overwrite
+      several ramdom pages in a tree, especially on a hard disk.
+      LSM-tree is compressed better, it takes smaller disk space. B-tree sometimes leave half of page unused after splitting.
+    Disadvantage of LSM-tree:
+      LSM-tree need make limited disk IO have to wait for an expensive compaction, this cause high latency at higher percentiles.
+      When migrate data into a new DB, the initial write take lots of time because of the on going compaction in the background
+      If write rate is high and compaction is not configured well, the compaction cannot keep up with the incoming writes, which easily make disk out of space.
+      B-tree only have one copy of key in the tree, but LSM-tree has multiple copies of a key in different SSTables. B-tree can offer strong transactional semantics
+      because we can just lock on ranges of keys by attach locks to tree.
+  Storing values within the index:
+    cluster index(storing all rwo data within the index) and heap file (the file which index reference points to) are two opposite way to refer data.
+  Multi-column indexes:
+    concatenateed index.
+  Full-text search and fuzzy indexes:
+    helpful when dealing with misspelled word, works with edit distance.
+  In-memory database:
+    In-memory database is faster not because of not reading from disk, but it don't need to encoding in-memory data structure in a form that can be written to disk.
+    It is also good for storedata models that are difficult to implement with disk-based indexes like priority queue and sets.
+    In memory database can deal with data which larger than available memory. The so-called anti-caching approach evict the least recently used data from memory to
+    disk, similar as how swap works.
+  OLAP and OLTP:
+    OLAP data warehouse: large amount of data, read intensively, don't write so much.
+    Big company always dump data from different OLTP DB into one OLAP DB for analysis purpose.
+    OLAP DB has a fact table in both Stars and Snowflakes module as a contral core. It contains all events and each event row has lot of columns for reference
+    of different dimensions.
+    Comparing to Stars module, Snowflake has sub-core and breaking down dimension table to get highly normallized attribute.
+  Column-Oriented Storage:
+    We often query only one or two columns, there is no need to read the whole row. We can store each column of a table in one file, which is very good for compression
+    as well. The distinct value in one column is normally much smaller than number of rows, so we use bitmap to represent value in each rows. Each distinct value has
+    one bitmap, each row has one bit, if a row has this distinct value, the bit is 1 vice versa.
+    Then we encode the bit map to several numbers indicate how many consecutive 0 and 1
+    This bitmap can even work well for AND and OR operation
+    It is also good for single-instruction-multi-data instruction in mordern CPUs.
+    It can fit into L1 cache comfortably.
+    
+    sorted column storage is good for the compression, the encoded data is very small for the sorted column, even encoded data for other columns is the same size
+    it's still a very good optimization. Column-oriented storage can use LSM-tree because it doesn't matter whether the in-memory store is column oriented or 
+    row oriented, it will compact, merge and sort anyway.
+  Aggregation in OLAP:
+    We use materialized view(aggregation) to cache multiple aggregation for reading. We can have several two dimensional tables to store data and we can aggregate
+    those table again to get aggregation for one dimension.
