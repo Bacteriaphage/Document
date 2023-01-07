@@ -137,3 +137,24 @@ chapter 3.
   Aggregation in OLAP:
     We use materialized view(aggregation) to cache multiple aggregation for reading. We can have several two dimensional tables to store data and we can aggregate
     those table again to get aggregation for one dimension.
+Chapter 4. Encoding
+  Json, XML, CSV
+    Benefit and drawback (pg. 114)
+    Binary encoding is very important when transport large data. The naive way to encode JSON waste lots of space.
+  Thrift and Protocol Buffers:
+    Both Thrift and protocol buffer use number to represent key name, and we only need to check number-key map during decoding, save lots of space if key is long.
+    In Thrift BinaryProtocol, encoded data is not so much compacted, but in Thrift CompactProtocol and Protocol Buffer, key number and value type are compacted into
+    1 byte, all number value have flexible space instead of 64/32 bits. A lead bit is employed to indicate whether there are still incoming bytes for the value, so
+    each byte has 7 bits to store part of value, and 1 bit is the indicator.
+    Forward/backward compactibility: we can change the key name, but not he key number, old code will ignore unrecognized key number and type/length field will help
+    it to skip. All new fields add after the first version must be optional or have a default value.
+  Avro - Hadoop encoding method:
+    only length and value are concatenated, same varible size number as Thrift compactprotocol and protocol buffer. No field information, no type information. There
+    are reader schema and writer schema to store data type and field name. Reader will get writer schema, comparing with reader schema then parse data. writer schema
+    is store in 1. beginning of large data file which under the same writer schema; 2. a table referring to a version number, the version number is in small data set;
+    3. setup communication process when RPC begin.
+    Avro is good for dynamically generate schema but Thrift have to manually assign field number to a field, and manually update field name.
+  For Thrift and protocol buffer, they rely on code generation, which is useful when the programming language is statically type language like C, C++ and Java. They
+  allow type checking and efficient in-memory structure for known type. This become an unnecessarily obstacle in dynamically typed languages like Javascript, Python.
+  Avro is good for them and Avro also provide code generation for C, C++ and Java.
+  
