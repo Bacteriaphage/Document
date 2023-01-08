@@ -158,3 +158,27 @@ Chapter 4. Encoding
   allow type checking and efficient in-memory structure for known type. This become an unnecessarily obstacle in dynamically typed languages like Javascript, Python.
   Avro is good for them and Avro also provide code generation for C, C++ and Java.
   
+  Model of Dataflow
+    Via Database: Using database as a media requires forward and backward compatibility. This need to be considered both in encoding/decoding aspect and application
+    aspect.
+    Via Network (RPC and REST): Microservice architecture makes each service request and respond to other services. They only expose its api to the outside and good
+      for restricting on what a client can and cannot do. Each service only maintained by one team, and the team can upgrade service without having to coordinate with
+      other teams. old and new version of server/client should be enable to exist at the same time without any encoding/decoding issue.
+      SOAP is an XML based protocol, a client can access a remote service using local classes and method call. it is useful in statically typed language. But different
+      extensions in different vendors may cause compatibilty problem.
+      RestFul is popular in the context of cross-organizational service integration and microservices.
+      RPC flaw: RPC request is unpredictable, it may return nothing without exception, it also may doing something on the server side but no respond, in this case,
+      another try will cause duplicated operations. The responsd time largely varies. RPC need to copy all values instead of pass by reference/pointer in local.
+      RPC call between two endpoint which use different language becauses ugly. Translating from datatype in A language to type in B language is very unreliable.
+      Because of the limitation, RPC often is used on requests between services owned by the same org within the same datacenter. It combining with binary encoding
+      usually has better performance than JSON over REST.
+      But RESTful api is good for experimentation and debugging, it doesn't need any compilation and web browser/curl can easily be the tool to test the protocol.
+      For RPC schema evolution, it's reasonable to assume servers will be update first then client, so server need to be backward compatible and client need to be
+        forward compatible. How to manage the compatibility properties of RPC depends on what data encoding method it use. Thrift/gRPC(Protocol Buffer)/Avro RPC use
+        their own rules to manage compatibility. RESTful JSON API add optional request parameters and add new fields to response objects to maintain compatibility.
+        SOAP use XML schema
+    Via Asynchronous message passing systems:
+      Client deliver message to another process via the middleware instead of direct network connection. Sender only send message, doesn't expect reply. one process
+      can be a sender and a reveiver, but those two parts work in different channels. This is why it is call asynchronous. (RabbitMQ, Kafka, ActiveMQ...)
+    Distribute actor framework: a programming model for convurrency in a single process(pg.138)
+    
