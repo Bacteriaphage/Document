@@ -181,23 +181,35 @@ Chapter 4. Encoding
       Client deliver message to another process via the middleware instead of direct network connection. Sender only send message, doesn't expect reply. one process
       can be a sender and a reveiver, but those two parts work in different channels. This is why it is call asynchronous. (RabbitMQ, Kafka, ActiveMQ...)
     Distribute actor framework: a programming model for convurrency in a single process(pg.138)
-  Chapter 5. Replication
-    When we need replication server:
-      1. keep data goegraphically close to users
-      2. allow the system to continue working even if some of it's parts have failed
-      3. scale out the number of machines that can serve read queries.
-    Single Leader, multi-leader and leaderless
-      systems having Leader: relational DB(Postgresql, mySql, Sql server...), non-relational DB(mongoDB, Espresso, RethinkDB...), message broker(kafka, rebbitMQ...)
-      synchronous vs asynchronous replication:
-        sync: leader needs to wait for follower's respond before reporting success to user. There is impractical to make all replica sync because any of them fail
-              for any reason will make the whole write halt. Usually, one of the replica need to be synchronous, other just asynchronous. If the synchronous replica
-              is slow or unavailable, one of the async replica becomes sync. This configuration is somtimes called semi-synchronous
-         Often, leader-based replication is configured to be completely asynchronous. This means write is not guaranteed to be durable. Chain replication is a sync
-         replication used in Azure storage, provide good performance and do not lose data. The workflow for replication is: Leader->replica->replica->...->tail. A
-         naive chain replication only read from tail. It provide high consistancy and reduce the workload for leader for high write throughput. But read throughput
-         is low. CRAQ adding dirty/clean flag to data in each replica, new data is dirty in replica until an acknowledge from tail is received, then change dirty
-         to clean and overwrite original data(if it's insert not update, no overwrite is needed). User can read from every replica, if users see both clean and dirty
-         row, confirm the latest clean data from tail.
-      Add new followers:
-        1. get snapshot from leader, 2. apply it to the new followers, 3. request all data changes since snapshot was taken in leader, 4. followers use this log to
-        catch up with leader.
+Chapter 5. Replication
+  When we need replication server:
+    1. keep data goegraphically close to users
+    2. allow the system to continue working even if some of it's parts have failed
+    3. scale out the number of machines that can serve read queries. 
+  Single Leader, multi-leader and leaderless
+    systems having Leader: relational DB(Postgresql, mySql, Sql server...), non-relational DB(mongoDB, Espresso, RethinkDB...), message broker(kafka, rebbitMQ...)
+    synchronous vs asynchronous replication:
+      sync: leader needs to wait for follower's respond before reporting success to user. There is impractical to make all replica sync because any of them fail
+            for any reason will make the whole write halt. Usually, one of the replica need to be synchronous, other just asynchronous. If the synchronous replica
+            is slow or unavailable, one of the async replica becomes sync. This configuration is somtimes called semi-synchronous
+      Often, leader-based replication is configured to be completely asynchronous. This means write is not guaranteed to be durable. Chain replication is a sync
+       replication used in Azure storage, provide good performance and do not lose data. The workflow for replication is: Leader->replica->replica->...->tail. A
+       naive chain replication only read from tail. It provide high consistancy and reduce the workload for leader for high write throughput. But read throughput
+       is low. CRAQ adding dirty/clean flag to data in each replica, new data is dirty in replica until an acknowledge from tail is received, then change dirty
+       to clean and overwrite original data(if it's insert not update, no overwrite is needed). User can read from every replica, if users see both clean and dirty
+       row, confirm the latest clean data from tail.
+    Add new followers:
+      1. get snapshot from leader, 2. apply it to the new followers, 3. request all data changes since snapshot was taken in leader, 4. followers use this log to
+      catch up with leader.
+    Handle node outage:
+      Follower failover: catch up using logs, starting from where it failed to the latest leader log.
+      leader failover: 1. determine leader fail, 2. choose a new leader, 3. reconfiguring system using the new leader.
+        new leader in async replication system might lose unreplicated record. Two leader might exist. The original leader might not actually fail, maybe just slow,
+        in this scenario, elect new leader and reconfiguring the system make things worse.
+    Replication log:
+      Statement based replication: replicate SQL statement, easy but replication must not include indeterministic statement like RAND, not stable order operation etc.
+      WAL(write-ahead-log) shipping: LSM and B-tree both have WAL, WAL describes data on a very low level, it contains details of which bytes were changed in which
+      disk blocks, so the different version of software will cause issues.
+      Logical log replication: human understandable log, like all new values of all columns for insert. key or all values for a deleted row. information of all value
+      for updated row and the original key or all values if no key is available.
+      Trigger-based replication(pg.161)
