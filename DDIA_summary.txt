@@ -213,3 +213,32 @@ Chapter 5. Replication
       Logical log replication: human understandable log, like all new values of all columns for insert. key or all values for a deleted row. information of all value
       for updated row and the original key or all values if no key is available.
       Trigger-based replication(pg.161)
+    Multi-Leader Replication:
+      The most useful case: we have different data center, each data center has a leader, a leader write to it's own replicas and ohter leaders in other datacenters.
+      Another case is user has several devices and most of time they are offline, user make change on some of devices and evetually all data need to be sync. 
+      The biggest problem, if two clients write the same field with different value to two data center, the data conflict is invulnerable.
+      To avoid conflict, we can make all changes for one field only go through one data center, so it acts like a single leader. But it is a problem when the leader
+      is down or user move the another location and the data should not write to the original data center any more.
+      Convergent conflict:
+        If we don't have conflict avoidance, we can 1. give each write a unique ID and the highest ID win, but it will lose data. 2. Give replica ID, the writes
+        originated at the higher ID replica always take precedence over writes originated at the lower ID replica, it will lose data as well. 3. Combine all value
+        together. 4, preserve all data, let application resolve the conflict.
+      Custom conflict resolution can happen on read or on write.
+      Automatic conflict resolution: 1. conflict-free replicated datatype, 2. Mergeable persistent data structure. 3. operational transformation.
+      Topologies: leader needs to update other leaders in a topology pattern. There are three easy patterns: circular, star, all to all.
+    Leaderless:
+      Client write to all replicas in a datacenter, and also read from all replicas. Because there are multiple clients and considering latency, the writes have no
+      order.
+      To make sure client write update-to-date record, quorum consistency need to be fulfilled that is: N is number of replicas in a datacenter, W is number of
+      replicas who have a successful write, R is number of replicas from which client can read from. DB must have R + W > N configuration to make sure at
+      least one replica the client read from has the correct value. To check which is the correct value, we add version information to the rows.
+      But quorun consistency has limitation as well, like if two writes happen concurrently, no one can confirm which is the latest version, if write and read
+      happen concurrently, we don't know whether we read an old or new value. There are lot of scenaio(pg.181)
+      When some replicas fail write, we need make them catch up with the correct data, there are two ways: 1. read repair, if a read from replicas contains stale
+      values, use the correct version value to update whose stale value replicas. 2. anti-enthropy process: a background process looks for differences in the data
+      between replicas and copies any missing data from one replica to another.
+      Sloppy Quorums and hinted handoff:
+        If client has connection issue to some designated nodes, but still have other nodes available, client can write to other nodes as a temporary place to save
+        write, after connection is fixed, move those new data back to those designated nodes.(hinted handoff). In this case, W is not the normal number of successful
+        write replica, so it's call sloppy quorums. It is a weakness for quorum consistency, even W' + R > N, we still cannot make sure clients can read the correct
+        version.
