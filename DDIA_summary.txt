@@ -225,6 +225,7 @@ Chapter 5. Replication
         together. 4, preserve all data, let application resolve the conflict.
       Custom conflict resolution can happen on read or on write.
       Automatic conflict resolution: 1. conflict-free replicated datatype, 2. Mergeable persistent data structure. 3. operational transformation.
+      https://medium.com/coinmonks/operational-transformations-as-an-algorithm-for-automatic-conflict-resolution-3bf8920ea447
       Topologies: leader needs to update other leaders in a topology pattern. There are three easy patterns: circular, star, all to all.
     Leaderless:
       Client write to all replicas in a datacenter, and also read from all replicas. Because there are multiple clients and considering latency, the writes have no
