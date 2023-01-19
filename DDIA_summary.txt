@@ -243,3 +243,14 @@ Chapter 5. Replication
         write, after connection is fixed, move those new data back to those designated nodes.(hinted handoff). In this case, W is not the normal number of successful
         write replica, so it's call sloppy quorums. It is a weakness for quorum consistency, even W' + R > N, we still cannot make sure clients can read the correct
         version.
+    Detecting concurrent write:
+      In leaderless or multi-leader system, if multiple client write to one key, concurrent will happen. But how can we detect this and how to make sure all data
+      can be somehow saved not dropped like LWW (LWW cannot be applied here because leaderless or multi-leader system has latency or other network issue which
+      make the order of write undeterministic). 
+      One algo is using one vertor to save value and it's version for one key(pg. 188). One replica cannot do multiple
+      writes to one key at the same time, so the version will always increase in server's view. But client will only keep the version it get from server's ack,
+      if server see the next push from client has version falling behind then it knows there are some concurrent write happens before this push. Instead of only saving
+      current value, this algo saves all values the client write to and get from server into a list.
+      To make the server eventual convergency, the server will union all client's list and overwrite old version value.
+      To remove items, we need tombstone because simply delete and union will make deleted items reappear.
+      To expand this algo to multiple replica in leaderless and multi-leader system, each replica will keep set of vectors and the whole system has version vectors.
