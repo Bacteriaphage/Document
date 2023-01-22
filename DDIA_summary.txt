@@ -254,3 +254,21 @@ Chapter 5. Replication
       To make the server eventual convergency, the server will union all client's list and overwrite old version value.
       To remove items, we need tombstone because simply delete and union will make deleted items reappear.
       To expand this algo to multiple replica in leaderless and multi-leader system, each replica will keep set of vectors and the whole system has version vectors.
+Chapter 6. Partitioning
+  (1. How does index work with partitioning and partitioning approach; 2. rebalancing; 3. how to route requests to partitions and execute queries)
+  Partitioning of Key-Value data:
+    1. By key range: sort the key and cut all sorted key into several ranges, store one range to one partition. Good: very good for range queries. Bad: Hot spot are
+      very easy to happen. some ranges might have more records than others (skew)
+    2. By hashing value. Good: records is placed randomly, if with consistent hashing, they can be evenly balanced among partitions. Bad: hard to do range queries
+    3. Cassandra compromise between above to method. Concatenate a key with columns, sort the key and only hash first part of the key, so that it's fast to do range
+      queries if first part of the key are the same. It's very good for one-to-many data model.
+    All above method cannot avoid skewed workload if one key is hot. In this case, application need to take care of hot key. one solution is to append a small random
+      number to the key and split them to different partition. (How multiple keys works? If the key has intensive write, then write to different partition will need
+      application read all partitions and resolve version. If the key has intensive read, then it's more like replication.)
+  Partitioning and Secondary indexes:
+    Instead of using one index to query data, user sometime need other keys to do search, this require the second index key to help make query faster.
+    Partitioning secondary indexes by document: each partition keep it's own secondary index for it's own records(color:Red). Querying by a second index needs query 
+      all partitions because the same second key might appear in different partitions. It's called scatter and gather which contribute the tail of latency of 
+      percentile.
+    Partitioning secondary indexes by Term: Comparing to by document approach, it only keeps one second key in one partition, so if delete/insert for this key happens
+      in other partitions, this partition needs to be updated asynchrouous as well. The second key also can be sorted and partitioned among partitions.
