@@ -259,7 +259,8 @@ Chapter 6. Partitioning
   Partitioning of Key-Value data:
     1. By key range: sort the key and cut all sorted key into several ranges, store one range to one partition. Good: very good for range queries. Bad: Hot spot are
       very easy to happen. some ranges might have more records than others (skew)
-    2. By hashing value. Good: records is placed randomly, if with consistent hashing, they can be evenly balanced among partitions. Bad: hard to do range queries
+    2. By hashing value. Good: records is placed randomly, if with consistent hashing(with virtual nodes), they can be evenly balanced among partitions. 
+       Bad: hard to do range queries
     3. Cassandra compromise between above to method. Concatenate a key with columns, sort the key and only hash first part of the key, so that it's fast to do range
       queries if first part of the key are the same. It's very good for one-to-many data model.
     All above method cannot avoid skewed workload if one key is hot. In this case, application need to take care of hot key. one solution is to append a small random
@@ -272,3 +273,22 @@ Chapter 6. Partitioning
       percentile.
     Partitioning secondary indexes by Term: Comparing to by document approach, it only keeps one second key in one partition, so if delete/insert for this key happens
       in other partitions, this partition needs to be updated asynchrouous as well. The second key also can be sorted and partitioned among partitions.
+  Rebalance:
+    (rebalance request: 1.after rebalance, the load should be even, 2. during rebalance, DB should accept read and write, 3. No more data than necessary should be
+    move around)
+    Don't do hash mod N rebalance. increasing of N will trigger move for almost every data
+    Fixed number of partitions: number of partition is fixed and the maximum number depends on the partitioning algo. One node contain more than one partitions.
+      if partitions in nodes getting large, only move small number of partitions to a new node and others remain on the same node. Tiak/ElasticSearch/Couchbase
+      use this strats. In this config, if all partitions grow to their limitation, one node only contains one partition, which means the fixed number of partitions
+      determine the maximum of node we can have in this system, so it's important to choose partitioning algo and decide number of partitions.
+      Too large number means frequent rebalance and difficult recovery. Too small means too much overhead.
+    Dynamic partitioning: Comparing to fixed number of partitions, this config allow partition split and merging, split when so many records in one partition, on
+      the other hand, it will merge. This is mostly used in key-range partitioned DB. This can avoid the issue of choosing number of partitions. But when the DB
+      is almost empty, all data go into one partition and other partitions are idle. we can only get boundary when number of data touch the split trigger, so it
+      cannot use all node efficiently. To solve this, we can create several partitions at the beginning(pre-split).
+      It can also support hash-partitioned data in MongoDB as well.
+    Partitioning proportionally to nodes: Each node has fixed number of partitions, adding nodes trigger existing partition to split, one half remains on the same
+      node, the other migrate to new nodes(pg.213). Cassandra. This is similar to consistent hash, for exmaple, adding a new node means insert the hash of new node
+      to the hashing ring, any existing partition ahead of the new hash need to migrate to the new node.(In our case they are randomly picked and splitted).
+      
+      
