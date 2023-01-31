@@ -290,5 +290,22 @@ Chapter 6. Partitioning
     Partitioning proportionally to nodes: Each node has fixed number of partitions, adding nodes trigger existing partition to split, one half remains on the same
       node, the other migrate to new nodes(pg.213). Cassandra. This is similar to consistent hash, for exmaple, adding a new node means insert the hash of new node
       to the hashing ring, any existing partition ahead of the new hash need to migrate to the new node.(In our case they are randomly picked and splitted).
-      
-      
+  Request Routing:
+    Three ways to route a request: 
+      1. request is sent to any one node, if the node is not the correct node, it will route the request to the correct one. (Cassandra)
+      2. request is sent to a route tier (ZooKeeper) first, the route tier can get rebalance information from all node and it can make correct route decision. 
+         (Linkedin espresso)
+      3. clients themselves are aware of the correct destination (Couchbase)
+  Parallel Query Execution (PG.216)
+
+Chapter 7. Transaction
+  ACID concept recap
+  Atomic: commit all or abort all in one transaction
+  Consistency: The data in system must be in a good state, e.g. in accounting system, credit and debit across all acount must be balanced, it's more like a application
+               level concept. DB cannot do anything id user provides bad data
+  Isolation: the concurrent running transaction are isolated from each other, two users get value and set +1 cannot only make the value +1 in DB, should be +2.
+             This is called serialzable isolation and very expensive to achieve, alternative solution is weak isolation
+  Durability: DB can recover from disk failure or other hardware problem using WAL(write ahead log) or others.
+  Single-object operation and multi-objects operation: single object operation is easy, as it's name, we write only one table without impacting other data.
+    Sometime muti-object operation need transaction as well, e.g. foreign key update, second indexes update, keep several document in sync in document data model.
+    The ultimate goal of transaction is safe to retry. But retry can bring up new problem like duplicated operation, makeing system overload worse. etc.
